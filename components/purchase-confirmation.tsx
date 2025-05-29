@@ -10,9 +10,10 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Check, CreditCard, User, ArrowLeft, Mail, AlertCircle } from "lucide-react"
+import { getShowById } from "@/data/shows"
 
 interface PurchaseConfirmationProps {
-  selectedSeats: string[]
+  selectedSeats: { seatId: string; price: number; section: string; showId: string }[]
   onBack: () => void
   onComplete: (customerData: any) => void
 }
@@ -31,33 +32,30 @@ export default function PurchaseConfirmation({ selectedSeats, onBack, onComplete
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const seatPrices: { [key: string]: number } = {
-    A: 45000,
-    B: 45000,
-    C: 35000,
-    D: 35000,
-    E: 35000,
-    F: 25000,
-    G: 25000,
-    H: 25000,
-    I: 25000,
-    J: 25000,
-  }
-
-  const getSeatPrice = (seatId: string) => {
-    const row = seatId.charAt(0)
-    return seatPrices[row] || 25000
-  }
+  // Get show details from the first selected seat (all seats should be from the same show)
+  const showId = selectedSeats[0]?.showId
+  const show = getShowById(showId)
 
   const getTotalPrice = () => {
-    return selectedSeats.reduce((total, seatId) => total + getSeatPrice(seatId), 0)
+    return selectedSeats.reduce((total, seat) => total + seat.price, 0)
   }
 
-  const getSeatSection = (seatId: string) => {
-    const row = seatId.charAt(0)
-    if (["A", "B"].includes(row)) return "VIP"
-    if (["C", "D", "E"].includes(row)) return "Premium"
-    return "General"
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    if (!dateString) return ""
+    const date = new Date(dateString)
+    return date.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    })
+  }
+
+  // Format time for display
+  const formatTime = (timeString: string) => {
+    if (!timeString) return ""
+    const [hours, minutes] = timeString.split(":")
+    return `${hours}:${minutes}`
   }
 
   // Funciones de validación
@@ -205,19 +203,21 @@ export default function PurchaseConfirmation({ selectedSeats, onBack, onComplete
   }
 
   const sendTicketEmail = async (orderNumber: string) => {
+    if (!show) return
+
     try {
       const ticketData = {
         orderNumber,
         customerName: formData.name,
         customerEmail: formData.email,
-        eventName: "The Show Must Go On",
-        eventDate: "Jun 20, 2025",
-        eventTime: "11:20 PM",
-        eventLocation: "Maestro M. Lopez esq, Cruz Roja Argentina S/N, Córdoba",
-        seats: selectedSeats.map((seatId) => ({
-          id: seatId,
-          section: getSeatSection(seatId),
-          price: getSeatPrice(seatId),
+        eventName: show.title,
+        eventDate: formatDate(show.date),
+        eventTime: formatTime(show.time),
+        eventLocation: `${show.location}, ${show.city}`,
+        seats: selectedSeats.map((seat) => ({
+          id: seat.seatId,
+          section: seat.section,
+          price: seat.price,
         })),
         totalAmount: getTotalPrice() + 2500,
       }
@@ -295,6 +295,7 @@ export default function PurchaseConfirmation({ selectedSeats, onBack, onComplete
         ...formData,
         orderNumber,
         totalAmount: getTotalPrice() + 2500,
+        showData: show, // Include show data for other components
       })
     }, 3000)
   }
@@ -516,13 +517,13 @@ export default function PurchaseConfirmation({ selectedSeats, onBack, onComplete
                   <div>
                     <h4 className="font-semibold mb-2">Asientos Seleccionados</h4>
                     <div className="space-y-2">
-                      {selectedSeats.map((seatId) => (
-                        <div key={seatId} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      {selectedSeats.map((seat) => (
+                        <div key={seat.seatId} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                           <div className="flex items-center space-x-2">
-                            <span className="font-semibold">{seatId}</span>
-                            <Badge variant="outline">{getSeatSection(seatId)}</Badge>
+                            <span className="font-semibold">{seat.seatId}</span>
+                            <Badge variant="outline">{seat.section}</Badge>
                           </div>
-                          <span className="font-semibold">${getSeatPrice(seatId).toLocaleString()}</span>
+                          <span className="font-semibold">${seat.price.toLocaleString()}</span>
                         </div>
                       ))}
                     </div>
@@ -556,19 +557,23 @@ export default function PurchaseConfirmation({ selectedSeats, onBack, onComplete
               <CardContent className="space-y-2">
                 <div className="flex justify-between">
                   <span>Evento:</span>
-                  <span className="font-semibold">The Show Must Go On</span>
+                  <span className="font-semibold">{show?.title || "Evento"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Artista:</span>
+                  <span className="font-semibold">{show?.artist || "Artista"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Fecha:</span>
-                  <span>Jun 20, 2025</span>
+                  <span>{formatDate(show?.date || "")}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Hora:</span>
-                  <span>11:20 PM</span>
+                  <span>{formatTime(show?.time || "")}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Lugar:</span>
-                  <span>Cruz Roja Argentina</span>
+                  <span>{show?.venue || "Venue"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Cantidad:</span>
