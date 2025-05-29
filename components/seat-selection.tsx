@@ -9,7 +9,8 @@ import { ArrowLeft, User, CreditCard } from "lucide-react"
 
 interface SeatSelectionProps {
   onBack: () => void
-  onConfirm: (selectedSeats: string[]) => void
+  onConfirm: (selectedSeats: { seatId: string; price: number; section: string; showId: number }[]) => void
+  showId: number
 }
 
 interface Seat {
@@ -110,12 +111,21 @@ export default function SeatSelection({ onBack, onConfirm }: SeatSelectionProps)
   }
 
   const handleConfirmSelection = () => {
-    if (selectedSeats.length === 0) {
-      alert("Por favor selecciona al menos un asiento")
-      return
-    }
-    onConfirm(selectedSeats)
+  if (selectedSeats.length === 0) {
+    alert("Por favor selecciona al menos un asiento")
+    return
   }
+
+  const selectedData = getSelectedSeatsInfo().map((seat) => ({
+    seatId: seat.id,
+    price: seat.price,
+    section: seat.section,
+    showId: showId, // <- Aquí lo vinculás con el show
+  }))
+
+  onConfirm(selectedData)
+  }
+
 
   const groupedSeats = groupSeatsByRow()
 
