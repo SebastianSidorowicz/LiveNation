@@ -173,7 +173,6 @@ export class ProfessionalTicketGenerator {
     this.doc.setTextColor(250, 250, 250)
     this.doc.text("Live Nation®", margin + 40, yPosition + 60, { angle: -15 })
 
-    )
     // Footer elegante
     this.doc.setFontSize(8)
     this.doc.setTextColor(100, 100, 100)
@@ -292,7 +291,7 @@ export class ProfessionalTicketGenerator {
 
     instructions.forEach((instruction, index) => {
       this.doc.text(instruction, centerX, 235 + index * 10, { align: "center" })
-    }
+    })
   }
 
   save(filename: string): void {
