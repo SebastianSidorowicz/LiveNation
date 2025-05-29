@@ -20,7 +20,9 @@ type PageState = "details" | "seat-selection" | "purchase-confirmation" | "purch
 
 export default function ShowDetailPage({ showId, onBack }: ShowDetailPageProps) {
   const [currentPage, setCurrentPage] = useState<PageState>("details")
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([])
+  const [selectedSeats, setSelectedSeats] = useState<
+    { seatId: string; price: number; section: string; showId: string }[]
+  >([])
   const [customerData, setCustomerData] = useState<any>(null)
 
   const show = getShowById(showId)
@@ -48,7 +50,7 @@ export default function ShowDetailPage({ showId, onBack }: ShowDetailPageProps) 
     setCurrentPage("details")
   }
 
-  const handleSeatSelectionConfirm = (seats: string[]) => {
+  const handleSeatSelectionConfirm = (seats: { seatId: string; price: number; section: string; showId: string }[]) => {
     setSelectedSeats(seats)
     setCurrentPage("purchase-confirmation")
   }
@@ -71,7 +73,13 @@ export default function ShowDetailPage({ showId, onBack }: ShowDetailPageProps) 
 
   // Render different pages based on state
   if (currentPage === "seat-selection") {
-    return <SeatSelection onBack={handleSeatSelectionBack} onConfirm={handleSeatSelectionConfirm} />
+    return (
+      <SeatSelection
+        onBack={handleSeatSelectionBack}
+        onConfirm={handleSeatSelectionConfirm}
+        showId={showId} // Pass the showId to SeatSelection
+      />
+    )
   }
 
   if (currentPage === "purchase-confirmation") {
@@ -122,7 +130,7 @@ export default function ShowDetailPage({ showId, onBack }: ShowDetailPageProps) 
       <header className="bg-black text-white">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <img src="/images/live-nation-logo.png" alt="Live Nation" className="h-8 w-auto filter invert" />
+            <Music className="h-8 w-8" />
             <div>
               <h1 className="text-2xl font-bold">LIVE NATION</h1>
               <p className="text-sm text-gray-300">Productions</p>
@@ -291,7 +299,7 @@ export default function ShowDetailPage({ showId, onBack }: ShowDetailPageProps) 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-8 mt-12">
         <div className="container mx-auto px-4 text-center">
-          <img src="/images/live-nation-logo.png" alt="Live Nation" className="h-6 w-auto mx-auto mb-4 filter invert" />
+          <Music className="h-6 w-6 mx-auto mb-4" />
           <p className="text-gray-400">© 2025 Live Nation Productions. Todos los derechos reservados.</p>
         </div>
       </footer>

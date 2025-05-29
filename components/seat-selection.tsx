@@ -6,10 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, User, CreditCard } from "lucide-react"
+import { getShowById } from "@/data/shows"
 
 interface SeatSelectionProps {
   onBack: () => void
-  onConfirm: (selectedSeats: string[]) => void
+  onConfirm: (selectedSeats: { seatId: string; price: number; section: string; showId: string }[]) => void
+  showId: string
 }
 
 interface Seat {
@@ -21,14 +23,32 @@ interface Seat {
   section: string
 }
 
-export default function SeatSelection({ onBack, onConfirm }: SeatSelectionProps) {
+export default function SeatSelection({ onBack, onConfirm, showId }: SeatSelectionProps) {
+  // Get show details based on showId
+  const show = getShowById(showId)
+
   // Generar asientos con algunos ocupados aleatoriamente
   const generateSeats = (): Seat[] => {
     const seats: Seat[] = []
+
+    // Use show's pricing if available, otherwise use default pricing
+    const seatPricing = show?.seatPricing || {
+      A: 45000,
+      B: 45000,
+      C: 35000,
+      D: 35000,
+      E: 35000,
+      F: 25000,
+      G: 25000,
+      H: 25000,
+      I: 25000,
+      J: 25000,
+    }
+
     const sections = [
-      { name: "VIP", rows: ["A", "B"], seatsPerRow: 10, price: 45000 },
-      { name: "Premium", rows: ["C", "D", "E"], seatsPerRow: 12, price: 35000 },
-      { name: "General", rows: ["F", "G", "H", "I", "J"], seatsPerRow: 15, price: 25000 },
+      { name: "VIP", rows: ["A", "B"], seatsPerRow: 10, price: seatPricing.A },
+      { name: "Premium", rows: ["C", "D", "E"], seatsPerRow: 12, price: seatPricing.C },
+      { name: "General", rows: ["F", "G", "H", "I", "J"], seatsPerRow: 15, price: seatPricing.F },
     ]
 
     sections.forEach((section) => {
@@ -41,7 +61,7 @@ export default function SeatSelection({ onBack, onConfirm }: SeatSelectionProps)
             row,
             number: i,
             status: isOccupied ? "occupied" : "available",
-            price: section.price,
+            price: seatPricing[row] || section.price,
             section: section.name,
           })
         }
@@ -114,10 +134,36 @@ export default function SeatSelection({ onBack, onConfirm }: SeatSelectionProps)
       alert("Por favor selecciona al menos un asiento")
       return
     }
-    onConfirm(selectedSeats)
+
+    const selectedData = getSelectedSeatsInfo().map((seat) => ({
+      seatId: seat.id,
+      price: seat.price,
+      section: seat.section,
+      showId: showId,
+    }))
+
+    onConfirm(selectedData)
   }
 
   const groupedSeats = groupSeatsByRow()
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    if (!dateString) return ""
+    const date = new Date(dateString)
+    return date.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
+  }
+
+  // Format time for display
+  const formatTime = (timeString: string) => {
+    if (!timeString) return ""
+    const [hours, minutes] = timeString.split(":")
+    return `${hours}:${minutes}`
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -166,7 +212,9 @@ export default function SeatSelection({ onBack, onConfirm }: SeatSelectionProps)
                 <div className="space-y-6">
                   {/* VIP Section */}
                   <div>
-                    <h4 className="text-lg font-semibold mb-2 text-purple-600">VIP - $45.000</h4>
+                    <h4 className="text-lg font-semibold mb-2 text-purple-600">
+                      VIP - ${(show?.seatPricing?.A || 45000).toLocaleString()}
+                    </h4>
                     <div className="space-y-2">
                       {["A", "B"].map((row) => (
                         <div key={row} className="flex items-center justify-center space-x-1">
@@ -189,7 +237,9 @@ export default function SeatSelection({ onBack, onConfirm }: SeatSelectionProps)
 
                   {/* Premium Section */}
                   <div>
-                    <h4 className="text-lg font-semibold mb-2 text-orange-600">Premium - $35.000</h4>
+                    <h4 className="text-lg font-semibold mb-2 text-orange-600">
+                      Premium - ${(show?.seatPricing?.C || 35000).toLocaleString()}
+                    </h4>
                     <div className="space-y-2">
                       {["C", "D", "E"].map((row) => (
                         <div key={row} className="flex items-center justify-center space-x-1">
@@ -212,7 +262,9 @@ export default function SeatSelection({ onBack, onConfirm }: SeatSelectionProps)
 
                   {/* General Section */}
                   <div>
-                    <h4 className="text-lg font-semibold mb-2 text-blue-600">General - $25.000</h4>
+                    <h4 className="text-lg font-semibold mb-2 text-blue-600">
+                      General - ${(show?.seatPricing?.F || 25000).toLocaleString()}
+                    </h4>
                     <div className="space-y-2">
                       {["F", "G", "H", "I", "J"].map((row) => (
                         <div key={row} className="flex items-center justify-center space-x-1">
@@ -279,19 +331,23 @@ export default function SeatSelection({ onBack, onConfirm }: SeatSelectionProps)
               <CardContent className="space-y-2">
                 <div className="flex justify-between">
                   <span>Evento:</span>
-                  <span className="font-semibold">The Show Must Go On</span>
+                  <span className="font-semibold">{show?.title || "Evento"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Artista:</span>
+                  <span className="font-semibold">{show?.artist || "Artista"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Fecha:</span>
-                  <span>Jun 20, 2025</span>
+                  <span>{formatDate(show?.date || "")}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Hora:</span>
-                  <span>11:20 PM</span>
+                  <span>{formatTime(show?.time || "")}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Lugar:</span>
-                  <span>Cruz Roja Argentina</span>
+                  <span>{show?.venue || "Venue"}</span>
                 </div>
               </CardContent>
             </Card>
