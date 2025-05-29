@@ -78,7 +78,10 @@ export default function ShowSearchHome({ onLogout, onSelectShow }: ShowSearchHom
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <img src="/images/live-nation-logo.png" alt="Live Nation" className="h-8 w-auto" />
+              <div className="flex items-center space-x-2">
+                <Music className="h-8 w-8 text-red-600" />
+                <span className="text-xl font-bold text-gray-900">LIVE NATION</span>
+              </div>
               <div className="hidden md:block">
                 <h1 className="text-xl font-bold text-gray-900">Encuentra tu próximo show</h1>
                 <p className="text-sm text-gray-600">Los mejores eventos en vivo</p>
@@ -299,7 +302,10 @@ export default function ShowSearchHome({ onLogout, onSelectShow }: ShowSearchHom
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <img src="/images/live-nation-logo.png" alt="Live Nation" className="h-8 w-auto mb-4 filter invert" />
+              <div className="flex items-center space-x-2 mb-4">
+                <Music className="h-8 w-8 text-white" />
+                <span className="text-xl font-bold text-white">LIVE NATION</span>
+              </div>
               <p className="text-gray-400 text-sm">
                 La plataforma líder en entretenimiento en vivo. Conectamos artistas con fans.
               </p>
