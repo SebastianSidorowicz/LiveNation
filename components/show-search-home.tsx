@@ -331,10 +331,26 @@ export default function ShowSearchHome({ onLogout, onSelectShow }: ShowSearchHom
             <div>
               <h4 className="font-semibold mb-4">Síguenos</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li>Facebook</li>
-                <li>Instagram</li>
-                <li>Twitter</li>
-                <li>YouTube</li>
+                <li>
+                  <a href="https://www.facebook.com/LiveNation/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
+                    Facebook
+                  </a>
+                </li>
+                <li>
+                  <a href="https://www.instagram.com/livenationnyc" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
+                    Instagram
+                  </a>
+                </li>
+                <li>
+                  <a href="https://x.com/LiveNation" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
+                    Twitter
+                  </a>
+                </li>
+                <li>
+                  <a href="https://www.youtube.com/user/livenationhungary" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
+                    YouTube
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
