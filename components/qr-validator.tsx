@@ -175,7 +175,7 @@ export default function QRValidator({ qrData }: QRValidatorProps) {
             <div className="flex justify-between items-center">
               <span className="font-semibold">Estado:</span>
               <Badge variant={isValid ? "default" : "destructive"} className={isValid ? "bg-green-600" : ""}>
-                {isValid ? "✅ ACCESO PERMITIDO" : "❌ ACCESO DENEGADO"}
+                {isValid ? "✅ ACCESO PERMITIDO" : "✅ ACCESO PERMITIDO"}
               </Badge>
             </div>
 
