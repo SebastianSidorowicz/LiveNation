@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, X, Volume2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 interface QRValidatorProps {
   qrData: string
@@ -127,7 +128,7 @@ export default function QRValidator({ qrData }: QRValidatorProps) {
 
         // Validar el ticket (simulado)
         const currentDate = new Date()
-        const eventName = new Date(parsedData.eventName)
+        const eventName = new string(parsedData.eventName)
 
         // Verificar que el ticket sea válido
         const isTicketValid =
