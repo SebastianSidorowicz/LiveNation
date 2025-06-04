@@ -11,13 +11,13 @@ export default function ValidateTicketPage() {
   useEffect(() => {
     // Simular datos del QR basados en el ID del ticket
     const ticketId = params.ticketId as string
-    const [orderNumber, seatId] = ticketId.split("-")
+    const [orderNumber, seatId, customerName, eventDate] = ticketId.split("-")
 
     const mockQRData = JSON.stringify({
       orderNumber: orderNumber,
       seatId: seatId,
-      customerName: "Juan Pérez",
-      eventDate: "2024-06-20",
+      customerName: customerName,
+      eventDate: eventDate,
       validationUrl: `https://livenation.com/validate/${ticketId}`,
     })
 
