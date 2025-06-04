@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, X, Volume2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge" // Asegurate de tener esto
 
 interface QRValidatorProps {
   qrData: string
@@ -188,7 +189,7 @@ export default function QRValidator({ qrData }: QRValidatorProps) {
                 <span className="font-semibold">Estado:</span>
                 <Check className="w-5 h-5 text-green-600" />
               </div>
-              <span className="text-green-700 font-semibold">ACCESO PERMITIDO</span
+              <span className="text-green-700 font-semibold">ACCESO PERMITIDO</span>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between">
