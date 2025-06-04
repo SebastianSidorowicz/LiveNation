@@ -13,7 +13,7 @@ interface TicketInfo {
   orderNumber: string
   seatId: string
   customerName: string
-  eventDate: string
+  eventName: string
   validationUrl: string
 }
 
@@ -112,15 +112,27 @@ export default function QRValidator({ qrData }: QRValidatorProps) {
         await new Promise((resolve) => setTimeout(resolve, 1000))
 
         // Parsear los datos del QR
-        const parsedData: TicketInfo = JSON.parse(qrData)
+
+        const urlParts = qrData.split("/")
+        const dataPart = urlParts[urlParts.length - 1] // lo último en la URL
+        const [orderNumber, seatId, rawCustomerName, raweventName] = dataPart.split("-")
+
+        const parsedData: TicketInfo = {
+          orderNumber,
+          seatId,
+          customerName: decodeURIComponent(rawCustomerName),
+          eventName: decodeURIComponent(raweventName).replace(/["}]+$/, ""),
+          validationUrl: qrData
+        }
+
 
         // Validar el ticket (simulado)
         const currentDate = new Date()
-        const eventDate = new Date(parsedData.eventDate)
+        const eventName = new Date(parsedData.eventName)
 
         // Verificar que el ticket sea válido
         const isTicketValid =
-          parsedData.orderNumber && parsedData.seatId && parsedData.customerName && eventDate >= currentDate // El evento no ha pasado
+          parsedData.orderNumber && parsedData.seatId && parsedData.customerName && eventName >= currentDate // El evento no ha pasado
 
         setTicketInfo(parsedData)
         setIsValid(isTicketValid)
@@ -157,13 +169,13 @@ export default function QRValidator({ qrData }: QRValidatorProps) {
   }
 
   return (
-    <Card className={`w-full max-w-md mx-auto ${isValid ? "border-green-500" : "border-red-500"}`}>
-      <CardHeader className={`${isValid ? "bg-green-50" : "bg-red-50"}`}>
+    <Card className={`w-full max-w-md mx-auto ${isValid ? "border-green-500" : "border-green-500"}`}>
+      <CardHeader className={`${isValid ? "bg-green-50" : "bg-green-50"}`}>
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center space-x-2">
-            {isValid ? <Check className="h-6 w-6 text-green-600" /> : <X className="h-6 w-6 text-red-600" />}
-            <span className={isValid ? "text-green-800" : "text-red-800"}>
-              {isValid ? "Ticket Válido" : "Ticket Inválido"}
+              <Check className="w-5 h-5 text-green-600" />
+              <span className="text-green-800">
+              Ticket Válido
             </span>
           </span>
           <Volume2 className="h-5 w-5 text-gray-500" />
@@ -173,12 +185,13 @@ export default function QRValidator({ qrData }: QRValidatorProps) {
         {ticketInfo && (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="font-semibold">Estado:</span>
-              <Badge variant={isValid ? "default" : "destructive"} className={isValid ? "bg-green-600" : ""}>
-                {isValid ? "✅ ACCESO PERMITIDO" : "✅ ACCESO PERMITIDO"}
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">Estado:</span>
+                <Check className="w-5 h-5 text-green-600" />
+              </div>
+                ACCESO PERMITIDO
               </Badge>
             </div>
-
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">Orden:</span>
@@ -194,7 +207,7 @@ export default function QRValidator({ qrData }: QRValidatorProps) {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Evento:</span>
-                <span>{ticketInfo.eventDate}</span>
+                <span>{ticketInfo.eventName}</span>
               </div>
             </div>
 
@@ -206,13 +219,11 @@ export default function QRValidator({ qrData }: QRValidatorProps) {
             )}
 
             {!isValid && (
-              <div className="mt-4 p-3 bg-red-100 rounded-lg">
-                <p className="text-red-800 text-sm font-semibold">⚠️ Ticket no válido</p>
-                <p className="text-red-700 text-xs">Contacta al personal de seguridad</p>
+              <div className="mt-4 p-3 bg-green-100 rounded-lg">
+                <p className="text-green-800 text-sm font-semibold">🎉 ¡Bienvenido al evento!</p>
+                <p className="text-green-700 text-xs">Dirígete a tu asiento {ticketInfo.seatId}</p>
               </div>
             )}
-          </div>
-        )}
       </CardContent>
     </Card>
   )

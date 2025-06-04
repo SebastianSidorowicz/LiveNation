@@ -126,7 +126,9 @@ export class ProfessionalTicketGenerator {
     this.doc.text(`$${this.formatPrice(ticketData.price)}`, rightSectionX + 8, yPosition + 46)
 
     // Generar QR Code
-    const qrData = `${typeof window !== "undefined" ? window.location.origin : "https://livenation.com"}/validate/${ticketData.orderNumber}-${ticketData.seatId}`
+
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://livenation.com"
+    const qrData = `${baseUrl}/validate/${ticketData.orderNumber}-${ticketData.seatId}-${encodeURIComponent(ticketData.customerName)}-${encodeURIComponent(ticketData.eventName)}`
 
     try {
       const qrCodeDataURL = await QRCode.toDataURL(qrData, {
