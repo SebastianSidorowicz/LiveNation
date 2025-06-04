@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, X, Volume2 } from "lucide-react"
-import { Badge } from "@/components/ui/badge" // Asegurate de tener esto
 
 interface QRValidatorProps {
   qrData: string
@@ -189,7 +188,8 @@ export default function QRValidator({ qrData }: QRValidatorProps) {
                 <span className="font-semibold">Estado:</span>
                 <Check className="w-5 h-5 text-green-600" />
               </div>
-              <span className="text-green-700 font-semibold">ACCESO PERMITIDO</span>
+              <Badge variant="success">ACCESO PERMITIDO</Badge>
+
             </div>
             <div className="space-y-2">
               <div className="flex justify-between">
@@ -210,19 +210,16 @@ export default function QRValidator({ qrData }: QRValidatorProps) {
               </div>
             </div>
 
-            {isValid && (
-              <div className="mt-4 p-3 bg-green-100 rounded-lg">
-                <p className="text-green-800 text-sm font-semibold">🎉 ¡Bienvenido al evento!</p>
-                <p className="text-green-700 text-xs">Dirígete a tu asiento {ticketInfo.seatId}</p>
-              </div>
-            )}
-
-            {!isValid && (
-              <div className="mt-4 p-3 bg-green-100 rounded-lg">
-                <p className="text-green-800 text-sm font-semibold">🎉 ¡Bienvenido al evento!</p>
-                <p className="text-green-700 text-xs">Dirígete a tu asiento {ticketInfo.seatId}</p>
-              </div>
-            )}
+            <div className={`mt-4 p-3 rounded-lg ${isValid ? "bg-green-100" : "bg-green-100"}`}>
+        <p className={`text-sm font-semibold ${isValid ? "text-green-800" : "text-green-800"}`}>
+          {isValid ? "🎉 ¡Bienvenido al evento!" : "🎉 ¡Bienvenido al evento!"}
+        </p>
+        <p className={`text-xs ${isValid ? "text-green-700" : "text-green-700"}`}>
+          {isValid ? `Dirígete a tu asiento ${ticketInfo.seatId}` : "Dirígete a tu asiento${ticketInfo.seatId}"}
+        </p>
+      </div>
+    </div>
+  )}
           </CardContent>
     </Card>
   )
