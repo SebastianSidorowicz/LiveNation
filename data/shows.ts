@@ -21,7 +21,7 @@ export interface ShowDetails {
 export const shows: ShowDetails[] = [
   {
     id: "LIVE NATION",
-    title: "PRESENTATION LIVE NATION ",
+    title: "Presentacion Live Nation ",
     artist: "GRUPO 2",
     date: "2025-07-4",
     time: "8:15",

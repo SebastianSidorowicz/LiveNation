@@ -36,21 +36,21 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
 
       <Card className="w-full max-w-md bg-white/10 backdrop-blur-md border-white/20">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-white">Welcome to the Show</CardTitle>
+          <CardTitle className="text-3xl font-bold text-white">¡Te damos la bienvenida!</CardTitle>
           <CardDescription className="text-gray-100">
-            Enter your credentials to access the exclusive experience
+            Ingresa tus datos para acceder a una experiencia única
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-white">
-                Email
+                Correo electrónico
               </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="your@email.com"
+                placeholder="tucorreo@ejemplo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-white/10 border-white/20 text-white placeholder:text-orange-200"
@@ -59,12 +59,12 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-white">
-                Password
+                Contraseña
               </Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Ingresa tu contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="bg-white/10 border-white/20 text-white placeholder:text-orange-200"
@@ -75,11 +75,11 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
               type="submit"
               className="w-full bg-gradient-to-r from-red-500 to-orange-400 hover:from-red-600 hover:to-orange-500 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105"
             >
-              Enter the Experience
+              Acceder al Evento
             </Button>
           </form>
           <div className="mt-6 text-center">
-            <p className="text-orange-100 text-sm">Demo credentials: any email and password will work</p>
+            <p className="text-orange-100 text-sm">Demo: usa cualquier correo y contraseña para probar</p>
           </div>
         </CardContent>
       </Card>
