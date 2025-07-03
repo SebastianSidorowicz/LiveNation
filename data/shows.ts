@@ -29,7 +29,7 @@ export const shows: ShowDetails[] = [
     location: "Maestro M. Lopez esq, Cruz Roja Argentina S/N",
     city: "Córdoba",
     description: "Una experiencia visual inolvidable con los mejores presentadores.",
-    image: "/images/queen.jpg",
+    image: "/images/Live-Nation-Logo.png",
     genre: "exposure",
     priceRange: { min: 25000, max: 45000 },
     status: "on-sale",
