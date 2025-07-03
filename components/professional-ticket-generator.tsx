@@ -55,7 +55,7 @@ export class ProfessionalTicketGenerator {
     const leftSectionWidth = ticketWidth * 0.65
     const rightSectionX = margin + leftSectionWidth
 
-    // Header con logo (sin emojis)
+    // Header con logo 
     this.doc.setFont("helvetica", "bold")
     this.doc.setFontSize(14)
     this.doc.setTextColor(220, 38, 38)
@@ -75,14 +75,14 @@ export class ProfessionalTicketGenerator {
       this.doc.text(eventName[1], margin + 8, yPosition + 42)
     }
 
-    // Información del evento (sin emojis)
+    // Información del evento 
     this.doc.setFont("helvetica", "normal")
     this.doc.setFontSize(9)
     this.doc.setTextColor(60, 60, 60)
     this.doc.text(`FECHA: ${ticketData.eventDate}`, margin + 8, yPosition + 55)
     this.doc.text(`HORA: ${ticketData.eventTime}`, margin + 8, yPosition + 63)
 
-    // Ubicación (dividir si es muy larga)
+    // Ubicación 
     const location = this.splitText(ticketData.eventLocation, 30)
     this.doc.text(`LUGAR: ${location[0]}`, margin + 8, yPosition + 71)
     if (location[1]) {
@@ -125,8 +125,10 @@ export class ProfessionalTicketGenerator {
     this.doc.text(ticketData.section, rightSectionX + 8, yPosition + 38)
     this.doc.text(`$${this.formatPrice(ticketData.price)}`, rightSectionX + 8, yPosition + 46)
 
-    // Generar QR Code más pequeño y centrado
-    const qrData = `${typeof window !== "undefined" ? window.location.origin : "https://livenation.com"}/validate/${ticketData.orderNumber}-${ticketData.seatId}`
+    // Generar QR Code
+
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://livenation.com"
+    const qrData = `${baseUrl}/validate/${ticketData.orderNumber}-${ticketData.seatId}-${encodeURIComponent(ticketData.customerName)}-${encodeURIComponent(ticketData.eventName)}`
 
     try {
       const qrCodeDataURL = await QRCode.toDataURL(qrData, {
@@ -139,7 +141,6 @@ export class ProfessionalTicketGenerator {
         errorCorrectionLevel: "M",
       })
 
-      // QR más pequeño y mejor posicionado
       const qrSize = 25
       const qrX = rightSectionX + (stubWidth - qrSize) / 2
       const qrY = yPosition + 55
@@ -172,9 +173,20 @@ export class ProfessionalTicketGenerator {
     this.doc.setFont("helvetica", "bold")
     this.doc.setFontSize(24)
     this.doc.setTextColor(250, 250, 250)
-    this.doc.text("VALID", margin + 40, yPosition + 60, { angle: -15 })
+    this.doc.text("Live Nation®", margin + 40, yPosition + 60, { angle: -15 })
 
+    // Footer elegante
+    this.doc.setFontSize(8)
+    this.doc.setTextColor(100, 100, 100)
+    this.doc.text(
+      "2025 Live Nation Productions. Todos los derechos reservados.",
+      this.pageWidth / 2,
+      this.pageHeight - 20,
+      { align: "center" },
+    )
+    
     return yPosition + ticketHeight + 15
+
   }
 
   private splitText(text: string, maxLength: number): string[] {
@@ -220,9 +232,6 @@ export class ProfessionalTicketGenerator {
     for (const ticket of tickets) {
       currentY = await this.generateTicket(ticket, currentY)
     }
-
-    // Página de términos y condiciones
-    this.addTermsPage()
   }
 
   private addCoverPage(firstTicket: TicketData): void {
@@ -237,7 +246,7 @@ export class ProfessionalTicketGenerator {
     this.doc.circle(20, 40, 15, "F")
     this.doc.circle(this.pageWidth - 20, this.pageHeight - 40, 20, "F")
 
-    // Logo y título principal (sin emojis)
+    // Logo y título principal 
     this.doc.setFont("helvetica", "bold")
     this.doc.setFontSize(28)
     this.doc.setTextColor(255, 255, 255)
@@ -258,7 +267,7 @@ export class ProfessionalTicketGenerator {
     this.doc.setFontSize(14)
     this.doc.text(`${firstTicket.eventDate} - ${firstTicket.eventTime}`, centerX, 130, { align: "center" })
 
-    // Ubicación (dividir si es necesario)
+    // Ubicación
     const locationLines = this.splitText(firstTicket.eventLocation, 40)
     this.doc.text(locationLines[0], centerX, 145, { align: "center" })
     if (locationLines[1]) {
@@ -285,46 +294,6 @@ export class ProfessionalTicketGenerator {
     instructions.forEach((instruction, index) => {
       this.doc.text(instruction, centerX, 235 + index * 10, { align: "center" })
     })
-  }
-
-  private addTermsPage(): void {
-    this.doc.addPage()
-
-    this.doc.setFont("helvetica", "bold")
-    this.doc.setFontSize(16)
-    this.doc.setTextColor(220, 38, 38)
-    this.doc.text("TERMINOS Y CONDICIONES", this.pageWidth / 2, 30, { align: "center" })
-
-    this.doc.setFont("helvetica", "normal")
-    this.doc.setFontSize(10)
-    this.doc.setTextColor(0, 0, 0)
-
-    const terms = [
-      "1. Este ticket es valido unicamente para la fecha y hora indicadas.",
-      "2. No se permite el ingreso con bebidas, alimentos o sustancias ilegales.",
-      "3. No se realizaran reembolsos por cambios climaticos u otros factores externos.",
-      "4. El organizador no se responsabiliza por objetos perdidos o robados.",
-      "5. Se requiere identificacion valida para el ingreso.",
-      "6. No se permite la reventa de tickets.",
-      "7. El evento puede ser grabado para fines promocionales.",
-      "8. Live Nation se reserva el derecho de admision.",
-      "9. En caso de cancelacion, se notificara por email.",
-      "10. Este ticket no es transferible sin autorizacion.",
-    ]
-
-    terms.forEach((term, index) => {
-      this.doc.text(term, 20, 50 + index * 12, { maxWidth: this.pageWidth - 40 })
-    })
-
-    // Footer elegante
-    this.doc.setFontSize(8)
-    this.doc.setTextColor(100, 100, 100)
-    this.doc.text(
-      "2025 Live Nation Productions. Todos los derechos reservados.",
-      this.pageWidth / 2,
-      this.pageHeight - 20,
-      { align: "center" },
-    )
   }
 
   save(filename: string): void {

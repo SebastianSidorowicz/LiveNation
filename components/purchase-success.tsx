@@ -8,55 +8,51 @@ import { Check, Download, Mail, Calendar, MapPin, Clock, Inbox } from "lucide-re
 import { ProfessionalTicketGenerator } from "./professional-ticket-generator"
 
 interface PurchaseSuccessProps {
-  selectedSeats: string[]
+  selectedSeats: { seatId: string; price: number; section: string; showId: string }[]
   customerData: any
   onBackToHome: () => void
 }
 
 export default function PurchaseSuccess({ selectedSeats, customerData, onBackToHome }: PurchaseSuccessProps) {
-  const seatPrices: { [key: string]: number } = {
-    A: 45000,
-    B: 45000,
-    C: 35000,
-    D: 35000,
-    E: 35000,
-    F: 25000,
-    G: 25000,
-    H: 25000,
-    I: 25000,
-    J: 25000,
+  // Get show data from customerData (passed from purchase confirmation)
+  const show = customerData.showData
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    if (!dateString) return ""
+    const date = new Date(dateString)
+    return date.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
   }
 
-  const getSeatPrice = (seatId: string) => {
-    const row = seatId.charAt(0)
-    return seatPrices[row] || 25000
-  }
-
-  const getSeatSection = (seatId: string) => {
-    const row = seatId.charAt(0)
-    if (["A", "B"].includes(row)) return "VIP"
-    if (["C", "D", "E"].includes(row)) return "Premium"
-    return "General"
+  // Format time for display
+  const formatTime = (timeString: string) => {
+    if (!timeString) return ""
+    const [hours, minutes] = timeString.split(":")
+    return `${hours}:${minutes}`
   }
 
   const handleDownloadTickets = async () => {
     try {
       const generator = new ProfessionalTicketGenerator()
 
-      const ticketsData = selectedSeats.map((seatId) => ({
-        seatId,
-        section: getSeatSection(seatId),
-        price: getSeatPrice(seatId),
+      const ticketsData = selectedSeats.map((seat) => ({
+        seatId: seat.seatId,
+        section: seat.section,
+        price: seat.price,
         orderNumber: customerData.orderNumber,
         customerName: customerData.name,
-        eventName: "The Show Must Go On",
-        eventDate: "Jun 20, 2025",
-        eventTime: "11:20 PM",
-        eventLocation: "Cruz Roja Argentina, Córdoba",
+        eventName: show?.title || "Evento",
+        eventDate: formatDate(show?.date || ""),
+        eventTime: formatTime(show?.time || ""),
+        eventLocation: show ? `${show.location}, ${show.city}` : "Ubicación",
       }))
 
       await generator.generateAllTickets(ticketsData)
-      generator.save(`tickets-profesionales-${customerData.orderNumber}.pdf`)
+      generator.save(`tickets-${show?.title?.replace(/\s+/g, "-") || "evento"}-${customerData.orderNumber}.pdf`)
 
       alert("¡Tickets profesionales descargados exitosamente! 🎫✨")
     } catch (error) {
@@ -119,24 +115,28 @@ export default function PurchaseSuccess({ selectedSeats, customerData, onBackToH
                 <div className="flex items-center space-x-3">
                   <Calendar className="h-5 w-5 text-gray-500" />
                   <div>
-                    <p className="font-semibold">The Show Must Go On</p>
-                    <p className="text-sm text-gray-600">Jun 20, 2025</p>
+                    <p className="font-semibold">{show?.title || "Evento"}</p>
+                    <p className="text-sm text-gray-600">{show?.artist || "Artista"}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-3">
                   <Clock className="h-5 w-5 text-gray-500" />
                   <div>
-                    <p className="font-semibold">11:20 PM</p>
-                    <p className="text-sm text-gray-600">Puertas abren a las 10:30 PM</p>
+                    <p className="font-semibold">{formatDate(show?.date || "")}</p>
+                    <p className="text-sm text-gray-600">
+                      {formatTime(show?.time || "")} - Puertas abren a las {formatTime(show?.doors || "")}
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-3">
                   <MapPin className="h-5 w-5 text-gray-500" />
                   <div>
-                    <p className="font-semibold">Cruz Roja Argentina</p>
-                    <p className="text-sm text-gray-600">Maestro M. Lopez esq, Córdoba</p>
+                    <p className="font-semibold">{show?.venue || "Venue"}</p>
+                    <p className="text-sm text-gray-600">
+                      {show?.location || ""}, {show?.city || ""}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -151,21 +151,21 @@ export default function PurchaseSuccess({ selectedSeats, customerData, onBackToH
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {selectedSeats.map((seatId) => (
-                  <div key={seatId} className="flex justify-between items-center p-3 border rounded-lg bg-white">
+                {selectedSeats.map((seat) => (
+                  <div key={seat.seatId} className="flex justify-between items-center p-3 border rounded-lg bg-white">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                        <span className="font-bold text-red-600">{seatId}</span>
+                        <span className="font-bold text-red-600">{seat.seatId}</span>
                       </div>
                       <div>
-                        <p className="font-semibold">Asiento {seatId}</p>
-                        <Badge variant="outline">{getSeatSection(seatId)}</Badge>
+                        <p className="font-semibold">Asiento {seat.seatId}</p>
+                        <Badge variant="outline">{seat.section}</Badge>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">${getSeatPrice(seatId).toLocaleString()}</p>
+                      <p className="font-semibold">${seat.price.toLocaleString()}</p>
                       <p className="text-sm text-gray-600">
-                        #{customerData.orderNumber}-{seatId}
+                        #{customerData.orderNumber}-{seat.seatId}
                       </p>
                     </div>
                   </div>

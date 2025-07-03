@@ -38,54 +38,77 @@ export async function POST(request: NextRequest) {
 
     console.log("📧 Intentando enviar email a:", ticketData.customerEmail)
     console.log("🔑 API Key configurada:", apiKey ? "Sí" : "No")
+    console.log("🔑 API Key (primeros 10 chars):", apiKey.substring(0, 10) + "...")
 
     // Intentar envío con SendGrid
     try {
+      const sendGridPayload = {
+        personalizations: [
+          {
+            to: [
+              {
+                email: ticketData.customerEmail,
+                name: ticketData.customerName,
+              },
+            ],
+            subject: `🎫 Confirmación de compra - ${ticketData.eventName} | Live Nation`,
+          },
+        ],
+        from: {
+          email: "livenationltm@gmail.com",
+          name: "Live Nation Productions",
+        },
+        content: [
+          {
+            type: "text/plain",
+            value: generatePlainTextEmail(ticketData),
+          },
+          {
+            type: "text/html",
+            value: emailHTML,
+          },
+        ],
+      }
+
+      console.log("📤 Payload enviado a SendGrid:", JSON.stringify(sendGridPayload, null, 2))
+
       const sendGridResponse = await fetch("https://api.sendgrid.com/v3/mail/send", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          personalizations: [
-            {
-              to: [
-                {
-                  email: ticketData.customerEmail,
-                  name: ticketData.customerName,
-                },
-              ],
-              subject: `🎫 Confirmación de compra - ${ticketData.eventName} | Live Nation`,
-            },
-          ],
-          from: {
-            email: "livenationltm@gmail.com",
-            name: "Live Nation Productions",
-          },
-          content: [
-            {
-              type: "text/plain",
-              value: generatePlainTextEmail(ticketData),
-            },
-            {
-              type: "text/html",
-              value: emailHTML,
-            },
-          ],
-        }),
+        body: JSON.stringify(sendGridPayload),
       })
 
+      console.log("📡 SendGrid Response Status:", sendGridResponse.status)
+      console.log("📡 SendGrid Response Headers:", Object.fromEntries(sendGridResponse.headers.entries()))
+
       if (sendGridResponse.ok) {
-        console.log("✅ Email enviado exitosamente a:", ticketData.customerEmail)
+        console.log("✅ SendGrid acepta el email - Status 200/202")
+
+        // Intentar leer la respuesta (SendGrid puede devolver vacío)
+        const responseText = await sendGridResponse.text()
+        console.log("📧 SendGrid Response Body:", responseText || "(vacío - normal para SendGrid)")
+
         return NextResponse.json({
           success: true,
           message: "Email enviado exitosamente",
           orderNumber: ticketData.orderNumber,
+          sendGridStatus: sendGridResponse.status,
         })
       } else {
         const errorData = await sendGridResponse.text()
-        console.error("❌ Error de SendGrid:", errorData)
+        console.error("❌ Error de SendGrid - Status:", sendGridResponse.status)
+        console.error("❌ Error de SendGrid - Body:", errorData)
+
+        // Intentar parsear el error si es JSON
+        try {
+          const errorJson = JSON.parse(errorData)
+          console.error("❌ Error JSON parseado:", errorJson)
+        } catch {
+          console.error("❌ Error no es JSON válido")
+        }
 
         // Si SendGrid falla, simular envío exitoso para no bloquear la compra
         console.log("⚠️ Fallback: Simulando envío exitoso")
@@ -94,11 +117,13 @@ export async function POST(request: NextRequest) {
           message: "Compra procesada exitosamente (email en proceso)",
           orderNumber: ticketData.orderNumber,
           fallback: true,
+          sendGridError: errorData,
           emailContent: emailHTML, // Para mostrar en desarrollo
         })
       }
     } catch (sendGridError) {
       console.error("❌ Error conectando con SendGrid:", sendGridError)
+      console.error("❌ Error stack:", sendGridError instanceof Error ? sendGridError.stack : "No stack available")
 
       // Fallback: simular envío exitoso
       console.log("⚠️ Fallback: Simulando envío exitoso debido a error de conexión")
@@ -107,6 +132,7 @@ export async function POST(request: NextRequest) {
         message: "Compra procesada exitosamente (email en proceso)",
         orderNumber: ticketData.orderNumber,
         fallback: true,
+        networkError: sendGridError instanceof Error ? sendGridError.message : "Error desconocido",
         emailContent: emailHTML, // Para desarrollo
       })
     }
