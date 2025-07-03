@@ -20,17 +20,17 @@ export interface ShowDetails {
 
 export const shows: ShowDetails[] = [
   {
-    id: "the-show-must-go-on",
-    title: "The Show Must Go On Tour",
-    artist: "Queen",
+    id: "LIVE NATION",
+    title: "PRESENTATION LIVE NATION ",
+    artist: "GRUPO 2",
     date: "2025-07-4",
     time: "8:15",
     venue: "Cruz Roja Argentina",
     location: "Maestro M. Lopez esq, Cruz Roja Argentina S/N",
     city: "Córdoba",
-    description: "Una experiencia musical inolvidable con los mejores éxitos de Queen en un tributo espectacular.",
+    description: "Una experiencia visual inolvidable con los mejores presentadores.",
     image: "/images/queen.jpg",
-    genre: "Rock",
+    genre: "exposure",
     priceRange: { min: 25000, max: 45000 },
     status: "on-sale",
     featured: true,
