@@ -222,26 +222,42 @@ export default function PurchaseConfirmation({ selectedSeats, onBack, onComplete
         totalAmount: getTotalPrice() + 2500,
       }
 
+      console.log("📧 Enviando datos del ticket:", ticketData)
+
       const response = await fetch("/api/send-ticket-email", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(ticketData),
       })
 
-      const result = await response.json()
+      console.log("📡 Response status:", response.status)
+      console.log("📡 Response headers:", Object.fromEntries(response.headers.entries()))
 
-      if (result.success) {
-        console.log("Email enviado exitosamente")
+      // Safely parse the response
+      const contentType = response.headers.get("content-type") ?? ""
+      let result: any = null
+
+      if (contentType.includes("application/json")) {
+        // Response is JSON → parse normally
+        result = await response.json()
+        console.log("📧 Resultado JSON:", result)
+      } else {
+        // Probably a 4xx/5xx HTML or text response
+        const text = await response.text()
+        console.log("📧 Resultado texto:", text)
+        result = { success: false, message: text }
+      }
+
+      if (response.ok && result?.success) {
+        console.log("✅ Email enviado exitosamente")
         if (result.emailContent) {
-          console.log("Contenido del email:", result.emailContent)
+          console.log("📧 Contenido del email disponible en desarrollo")
         }
       } else {
-        console.error("Error enviando email:", result.message)
+        console.error("❌ Error enviando email:", result?.message ?? "Respuesta no exitosa")
       }
     } catch (error) {
-      console.error("Error enviando email:", error)
+      console.error("❌ Error enviando email (network/parse):", error)
     }
   }
 
@@ -305,7 +321,7 @@ export default function PurchaseConfirmation({ selectedSeats, onBack, onComplete
       <div className="container mx-auto max-w-4xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Button onClick={onBack} variant="outline" className="flex items-center space-x-2">
+          <Button onClick={onBack} variant="outline" className="flex items-center space-x-2 bg-transparent">
             <ArrowLeft className="h-4 w-4" />
             <span>Volver</span>
           </Button>
