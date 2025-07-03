@@ -224,34 +224,24 @@ export default function PurchaseConfirmation({ selectedSeats, onBack, onComplete
 
       const response = await fetch("/api/send-ticket-email", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(ticketData),
       })
 
-      // ── Safely parse the response ────────────────────────────────
-      const contentType = response.headers.get("content-type") ?? ""
-      let result: any = null
+      const result = await response.json()
 
-      if (contentType.includes("application/json")) {
-        // Response is JSON → parse normally
-        result = await response.json()
-      } else {
-        // Probably a 4xx/5xx HTML or text response
-        const text = await response.text()
-        result = { success: false, message: text }
-      }
-      // ─────────────────────────────────────────────────────────────
-
-      if (response.ok && result?.success) {
-        console.log("✅ Email enviado exitosamente")
+      if (result.success) {
+        console.log("Email enviado exitosamente")
         if (result.emailContent) {
-          console.log("📧 Contenido del email:", result.emailContent)
+          console.log("Contenido del email:", result.emailContent)
         }
       } else {
-        console.error("❌ Error enviando email:", result?.message ?? "Respuesta no exitosa")
+        console.error("Error enviando email:", result.message)
       }
     } catch (error) {
-      console.error("❌ Error enviando email (network/parse):", error)
+      console.error("Error enviando email:", error)
     }
   }
 
@@ -315,7 +305,7 @@ export default function PurchaseConfirmation({ selectedSeats, onBack, onComplete
       <div className="container mx-auto max-w-4xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Button onClick={onBack} variant="outline" className="flex items-center space-x-2 bg-transparent">
+          <Button onClick={onBack} variant="outline" className="flex items-center space-x-2">
             <ArrowLeft className="h-4 w-4" />
             <span>Volver</span>
           </Button>
